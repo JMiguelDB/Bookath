@@ -14,13 +14,18 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.data.Bucket;
 import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
+import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.request.DataDeleteRequest;
 import com.google.android.gms.fitness.request.DataReadRequest;
+import com.google.android.gms.fitness.request.DataUpdateRequest;
+import com.google.android.gms.fitness.result.DailyTotalResult;
 import com.google.android.gms.fitness.result.DataReadResult;
 
 import java.text.DateFormat;
@@ -30,23 +35,18 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
-    private Button mButtonViewWeek;
-    private Button mButtonViewToday;
-    private Button mButtonAddSteps;
-    private Button mButtonUpdateSteps;
-    private Button mButtonDeleteSteps;
-
     private GoogleApiClient mGoogleApiClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mButtonViewWeek = findViewById(R.id.btn_view_week);
-        mButtonViewToday = findViewById(R.id.btn_view_today);
-        mButtonAddSteps = findViewById(R.id.btn_add_steps);
-        mButtonUpdateSteps = findViewById(R.id.btn_update_steps);
-        mButtonDeleteSteps = findViewById(R.id.btn_delete_steps);
+        Button mButtonViewWeek = findViewById(R.id.btn_view_week);
+        Button mButtonViewToday = findViewById(R.id.btn_view_today);
+        Button mButtonAddSteps = findViewById(R.id.btn_add_steps);
+        Button mButtonUpdateSteps = findViewById(R.id.btn_update_steps);
+        Button mButtonDeleteSteps = findViewById(R.id.btn_delete_steps);
 
         mButtonViewWeek.setOnClickListener(this);
         mButtonViewToday.setOnClickListener(this);
@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.e("HistoryAPI", "onConnectionFailed");
+        Log.e("Error",connectionResult.toString());
     }
 
     public void onConnected(@Nullable Bundle bundle) {
@@ -85,19 +86,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 break;
             }
             case R.id.btn_view_today: {
-                //new ViewTodaysStepCountTask().execute();
+                new ViewTodaysStepCountTask().execute();
                 break;
             }
             case R.id.btn_add_steps: {
-                //new AddStepsToGoogleFitTask().execute();
+                new AddStepsToGoogleFitTask().execute();
                 break;
             }
             case R.id.btn_update_steps: {
-                //new UpdateStepsOnGoogleFitTask().execute();
+                new UpdateStepsOnGoogleFitTask().execute();
                 break;
             }
             case R.id.btn_delete_steps: {
-                //new DeleteYesterdaysStepsTask().execute();
+                new DeleteYesterdaysStepsTask().execute();
                 break;
             }
         }
@@ -166,5 +167,123 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         " Value: " + dp.getValue(field));
             }
         }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class ViewTodaysStepCountTask extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... params) {
+            displayStepDataForToday();
+            return null;
+        }
+    }
+
+    //In use, call this every 30 seconds in active mode, 60 in ambient on watch faces
+    private void displayStepDataForToday() {
+        DailyTotalResult result = Fitness.HistoryApi.readDailyTotal( mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA ).await(1, TimeUnit.MINUTES);
+        showDataSet(result.getTotal());
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class AddStepsToGoogleFitTask extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... params) {
+            addStepDataToGoogleFit();
+            displayLastWeeksData();
+            return null;
+        }
+    }
+
+    private void addStepDataToGoogleFit() {
+        //Adds steps spread out evenly from start time to end time
+        Calendar cal = Calendar.getInstance();
+        Date now = new Date();
+        cal.setTime(now);
+        long endTime = cal.getTimeInMillis();
+        cal.add(Calendar.HOUR_OF_DAY, -1);
+        long startTime = cal.getTimeInMillis();
+
+        DataSource dataSource = new DataSource.Builder()
+                .setAppPackageName(this)
+                .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                .setName("Step Count")
+                .setType(DataSource.TYPE_RAW)
+                .build();
+
+        int stepCountDelta = 1000000;
+        DataSet dataSet = DataSet.create(dataSource);
+
+        DataPoint point = dataSet.createDataPoint()
+                .setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS);
+        point.getValue(Field.FIELD_STEPS).setInt(stepCountDelta);
+        dataSet.add(point);
+
+        Status status = Fitness.HistoryApi.insertData(mGoogleApiClient, dataSet).await(1, TimeUnit.MINUTES);
+
+        if (!status.isSuccess()) {
+            Log.e( "History", "Problem with inserting data: " + status.getStatusMessage());
+        } else {
+            Log.e( "History", "data inserted" );
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class UpdateStepsOnGoogleFitTask extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... params) {
+            updateStepDataOnGoogleFit();
+            displayLastWeeksData();
+            return null;
+        }
+    }
+
+    private void updateStepDataOnGoogleFit() {
+        //If two entries overlap, the new data is dropped when trying to insert. Instead, you need to use update
+        Calendar cal = Calendar.getInstance();
+        Date now = new Date();
+        cal.setTime(now);
+        long endTime = cal.getTimeInMillis();
+        cal.add(Calendar.HOUR_OF_DAY, -1);
+        long startTime = cal.getTimeInMillis();
+
+        DataSource dataSource = new DataSource.Builder()
+                .setAppPackageName(this)
+                .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                .setName("Step Count")
+                .setType(DataSource.TYPE_RAW)
+                .build();
+
+        int stepCountDelta = 2000000;
+        DataSet dataSet = DataSet.create(dataSource);
+
+        DataPoint point = dataSet.createDataPoint()
+                .setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS);
+        point.getValue(Field.FIELD_STEPS).setInt(stepCountDelta);
+        dataSet.add(point);
+
+        DataUpdateRequest updateRequest = new DataUpdateRequest.Builder().setDataSet(dataSet).setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS).build();
+        Fitness.HistoryApi.updateData(mGoogleApiClient, updateRequest).await(1, TimeUnit.MINUTES);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class DeleteYesterdaysStepsTask extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... params) {
+            deleteStepDataOnGoogleFit();
+            displayLastWeeksData();
+            return null;
+        }
+    }
+
+    private void deleteStepDataOnGoogleFit() {
+        Calendar cal = Calendar.getInstance();
+        Date now = new Date();
+        cal.setTime(now);
+        long endTime = cal.getTimeInMillis();
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        long startTime = cal.getTimeInMillis();
+
+        DataDeleteRequest request = new DataDeleteRequest.Builder()
+                .setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS)
+                .addDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                .build();
+
+        Fitness.HistoryApi.deleteData(mGoogleApiClient, request).await(1, TimeUnit.MINUTES);
     }
 }
