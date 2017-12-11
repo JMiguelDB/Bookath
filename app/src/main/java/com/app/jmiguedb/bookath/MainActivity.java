@@ -47,12 +47,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Button mButtonAddSteps = findViewById(R.id.btn_add_steps);
         Button mButtonUpdateSteps = findViewById(R.id.btn_update_steps);
         Button mButtonDeleteSteps = findViewById(R.id.btn_delete_steps);
+        Button mButtonView = findViewById(R.id.btn_view);
 
         mButtonViewWeek.setOnClickListener(this);
         mButtonViewToday.setOnClickListener(this);
         mButtonAddSteps.setOnClickListener(this);
         mButtonUpdateSteps.setOnClickListener(this);
         mButtonDeleteSteps.setOnClickListener(this);
+        mButtonView.setOnClickListener(this);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Fitness.HISTORY_API)
@@ -80,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onClick(View v) {
+        Log.i("Layout","Entra en el switch");
         switch(v.getId()) {
             case R.id.btn_view_week: {
                 new ViewWeekStepCountTask().execute();
@@ -99,6 +102,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
             case R.id.btn_delete_steps: {
                 new DeleteYesterdaysStepsTask().execute();
+                break;
+            }
+            case R.id.btn_view:{
+                Log.i("Layout","Entra en el boton");
+                setContentView(R.layout.main_window);
                 break;
             }
         }
