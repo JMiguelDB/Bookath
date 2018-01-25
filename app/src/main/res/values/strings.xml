@@ -4,4 +4,6 @@
     <string name="campo">Name</string>
     <string name="todo">TODO</string>
     <string name="textview">TextView</string>
+    <string name="parse_server_url">http://ihealth-tfm.herokuapp.com/parse</string>
+    <string name="parse_app_id">ihealth-tfm</string>
 </resources>

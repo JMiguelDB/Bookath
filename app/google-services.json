@@ -1,0 +1,107 @@
+{
+  "project_info": {
+    "project_number": "863723796987",
+    "firebase_url": "https://ihealth-184916.firebaseio.com",
+    "project_id": "ihealth-184916",
+    "storage_bucket": "ihealth-184916.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:863723796987:android:84a403027670bd62",
+        "android_client_info": {
+          "package_name": "com.companyname.APIFitnessApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "863723796987-eafp3p0sh136v1rbj6sgaeotvi5s1nn3.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "863723796987-08ap28fhtjvujc9ahm4ghisknm0q4pee.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "863723796987-22sv9g3g8501jekejc5ct1426ufag00r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.companyname.APIFitnessApp",
+            "certificate_hash": "8fc8871bd29b3036594e796498913b16106cea98"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2xrASlNSOlBuzIrt-ozrDytmANDF_bqE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "863723796987-eafp3p0sh136v1rbj6sgaeotvi5s1nn3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:863723796987:android:e8931fabc71dd19b",
+        "android_client_info": {
+          "package_name": "com.app.jmiguedb.bookath"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "863723796987-ffhi7ran5943mdkst2tatv3u6hig5kq4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.jmiguedb.bookath",
+            "certificate_hash": "c4713aaa01b1ec56a538b41ef17e8f7c028a7dfd"
+          }
+        },
+        {
+          "client_id": "863723796987-eafp3p0sh136v1rbj6sgaeotvi5s1nn3.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "863723796987-08ap28fhtjvujc9ahm4ghisknm0q4pee.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2xrASlNSOlBuzIrt-ozrDytmANDF_bqE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "863723796987-eafp3p0sh136v1rbj6sgaeotvi5s1nn3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

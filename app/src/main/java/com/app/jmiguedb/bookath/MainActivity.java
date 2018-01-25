@@ -28,6 +28,8 @@ import com.google.android.gms.fitness.request.DataUpdateRequest;
 import com.google.android.gms.fitness.result.DailyTotalResult;
 import com.google.android.gms.fitness.result.DataReadResult;
 
+import com.parse.Parse;
+
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Inicializamos Parse
+        Parse.initialize(this);
         setContentView(R.layout.activity_main);
 
         Button mButtonViewWeek = findViewById(R.id.btn_view_week);
@@ -47,14 +51,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Button mButtonAddSteps = findViewById(R.id.btn_add_steps);
         Button mButtonUpdateSteps = findViewById(R.id.btn_update_steps);
         Button mButtonDeleteSteps = findViewById(R.id.btn_delete_steps);
-        Button mButtonView = findViewById(R.id.btn_view);
+        //Button mButtonView = findViewById(R.id.btn_view);
 
         mButtonViewWeek.setOnClickListener(this);
         mButtonViewToday.setOnClickListener(this);
         mButtonAddSteps.setOnClickListener(this);
         mButtonUpdateSteps.setOnClickListener(this);
         mButtonDeleteSteps.setOnClickListener(this);
-        mButtonView.setOnClickListener(this);
+        //mButtonView.setOnClickListener(this);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Fitness.HISTORY_API)
